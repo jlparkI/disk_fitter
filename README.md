@@ -8,6 +8,11 @@ results of the second assay from the outcome of the first. Error rates are autom
 export the results to Excel in an appropriate format for further use.
 
 
+
+
+The user manual provides more detailed instructions on use.
+
+
 ## Installation
 
 Disk Masher is available for download as a precompiled executable for 64-bit Windows (see the Releases tab above). 
@@ -29,7 +34,7 @@ cd scripts
 python main.py
 ```
 
-##Background
+## Background
 
 When a patient has an infection, doctors need to determine whether a bacterial strain can be killed by the antibiotic they would like to use or is resistant to it. They can do this in several ways:
 
@@ -39,14 +44,14 @@ When a patient has an infection, doctors need to determine whether a bacterial s
 
 + Occasionally antibiotics are also tested by measuring the MIC using a strip called an “E-Test”. This measurement gives an MIC like the broth dilution test but is less reliable than the broth dilution test.
 
-Frequently, a hospital just wants to know whether they can treat a patient with an antibiotic or not. So they divide MICs into three categories based on cutoff values called “breakpoints”. These categories are “Susceptible”, “Intermediate” and “Resistant”. If the bug is susceptible, it’s ok to go ahead and treat. If the bug is intermediate, maybe this antibiotic can be used, this decision is up to the doctor, and if it’s resistant definitely do not use this antibiotic. If the breakpoints are 2 and 16, for example, a bug with an MIC less than 2 is susceptible (good to treat), and a bug with an MIC less than 16 but greater than 2 is intermediate. The problem is that these categories are set based on broth MICs, whereas the hospital may need to use a disk test or E-test instead (tests 2 and 3). 
+Frequently, a hospital just wants to know whether they can treat a patient with an antibiotic or not. So MICs are divided into three categories based on values called “breakpoints”. These categories are “Susceptible”, “Intermediate” and “Resistant”. If the bug is susceptible, it’s ok to go ahead and treat. If the bug is intermediate, maybe this antibiotic can be used, this decision is up to the doctor, and if it’s resistant definitely do not use this antibiotic. If the breakpoints are 2 and 16, for example, a bug with an MIC less than 2 is susceptible (good to treat), and a bug with an MIC less than 16 but greater than 2 is intermediate. The problem is that these categories are set based on broth MICs, whereas the hospital may need to use a disk test or E-test instead (tests 2 and 3). 
 
 So microbiologists must find out how the disk and (sometimes) E-test measurements correspond to the broth MICs. The goal is to pick disk breakpoints/cutoffs and E-test breakpoints/cutoffs that give results which match the results of the gold-standard MIC test as reliably as possible. So if based on the MIC test, strains A-G should be classified as “Resistant” and strains H-Z should be classified as “Susceptible”, we need to pick a disk cutoff that would classify as many of them correctly as possible. 
 In other words, we can think of this as a simple supervised learning prediction task. Given a vector [1,disk zone], we need to correctly predict membership in an output category belonging to the set {0,1,2}, where 0 is susceptible, 1 is intermediate and 2 is resistant. We want to find two linear boundaries (disk zone cutoff for susceptible vs intermediate and disk zone cutoff for intermediate vs resistant) that maximize the accuracy of predictions made using the disks. Two simple approaches for choosing such boundaries are logistic regression, which tries to maximize the probability of correctly choosing output categories but is easily thrown off by outliers in smaller datasets, and a depth-1 decision tree classifier, which tries to maximize the purity of the populations on either side of the split point and is far more robust to outliers.
 
 DiskMasher incorporates the following features:
 
-+ Provides a simple and intuitive GUI interface that even non- math/computer-savvy microbiologists will find easy to use;
++ Provides a simple and intuitive GUI interface;
 + Offers the analyst the ability to import either MIC vs E-test MIC or MIC vs disk data from Excel, automatically fit and plot the data and the error rates using either logistic regression or decision tree based approaches;
 + Offers the analyst the ability to manually choose cutoffs if the analyst prefers this approach to the auto-fit procedure and see their effect on the error rate;
 + Finally, the analyst can export the heatmap plot, error rate table and other results to Excel for further review.
