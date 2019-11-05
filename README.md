@@ -7,7 +7,9 @@ assays. Disk Masher plots and fits the data with a user-selected algorithm to fi
 results of the second assay from the outcome of the first. Error rates are automatically calculated and the analyst can 
 export the results to Excel in an appropriate format for further use.
 
+![screenshot1](/screenshots/disk_masher_screenshot.png)
 
+![screenshot2](/screenshots/disk_masher_screenshot.png)
 
 
 The user manual provides more detailed instructions on use.
