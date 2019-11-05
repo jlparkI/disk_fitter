@@ -29,7 +29,7 @@ cd scripts
 python main.py
 ```
 
-##Background
+## Background
 
 When a patient has an infection, doctors need to determine whether a bacterial strain can be killed by the antibiotic they would like to use or is resistant to it. They can do this in several ways:
 
