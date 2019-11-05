@@ -8,6 +8,11 @@ results of the second assay from the outcome of the first. Error rates are autom
 export the results to Excel in an appropriate format for further use.
 
 
+
+
+The user manual provides more detailed instructions on use.
+
+
 ## Installation
 
 Disk Masher is available for download as a precompiled executable for 64-bit Windows (see the Releases tab above). 
