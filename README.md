@@ -9,7 +9,7 @@ export the results to Excel in an appropriate format for further use.
 
 ![screenshot1](/screenshots/disk_masher_screenshot.png)
 
-![screenshot2](/screenshots/disk_masher_screenshot.png)
+![screenshot2](/screenshots/disk_masher_screenshot_2.png)
 
 
 The user manual provides more detailed instructions on use.
