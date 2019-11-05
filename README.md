@@ -51,7 +51,7 @@ In other words, we can think of this as a simple supervised learning prediction 
 
 DiskMasher incorporates the following features:
 
-+ Provides a simple and intuitive GUI interface that even non- math/computer-savvy microbiologists will find easy to use;
++ Provides a simple and intuitive GUI interface;
 + Offers the analyst the ability to import either MIC vs E-test MIC or MIC vs disk data from Excel, automatically fit and plot the data and the error rates using either logistic regression or decision tree based approaches;
 + Offers the analyst the ability to manually choose cutoffs if the analyst prefers this approach to the auto-fit procedure and see their effect on the error rate;
 + Finally, the analyst can export the heatmap plot, error rate table and other results to Excel for further review.
