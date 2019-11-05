@@ -1,4 +1,4 @@
-import numpy as np, sklearn, pandas as pd, matplotlib.pyplot as plt, traceback
+import numpy as np, sklearn, pandas as pd, matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
@@ -12,7 +12,7 @@ def determine_data_type(qtapp):
 		return 'disk', 'Could not process the data! Column 2 contains negative values. Please reload and try again.'
 	if np.min(x) < 1 or np.max(x) > 60:
 		return 'mic', '0'
-	xbins = {0.016,0.03,0.06,0.12,0.25,0.5,1,2,4,8,16,32,64,128,256}
+	xbins = {0.016,0.03,0.06,0.12,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256}
 	likely_mic_values = 0
 	for xval in x:
 		if xval in xbins:
@@ -45,7 +45,6 @@ def fit_data(qtapp, data_type='disk'):
 		miccutoffR = float(qtapp.miccutoffR)
 		miccutoffS = float(qtapp.miccutoffS)
 	except:
-		traceback.print_exc()
 		return "The MIC cutoffs you have entered are not valid numeric characters. Try again."
 
 	try:
@@ -54,15 +53,13 @@ def fit_data(qtapp, data_type='disk'):
 		x, ysuscep, yresist = process_traindata(qtapp.current_dataset, miccutoffR, miccutoffS)
 	except:
 		#If we couldn't do that, they PROBABLY entered numeric characters. Give 'em an error.
-		traceback.print_exc()
 		return "The data could not be processed. Typically this error results when it contains non-numeric characters (e.g. <=). Try again."
 
 	#Check to make sure their dataset really does contain both flavors. If not, give 'em error message 6.
 	if np.unique(ysuscep).shape[0] == 1 or np.unique(yresist).shape[0] == 1:
 		return ("You are trying to fit data that either does not contain any resistant strains or does not contain any susceptible strains "
-				"(i.e. there are only resistant + intermediate or resistant + susceptible in this dataset). The data will be plotted and "
-				"error rates calculated but auto-fitting (i.e. determination of disk cutoffs) cannot be conducted. You could try using "
-				"manual cutoff selection for this dataset.")
+				"(i.e. there are only resistant + intermediate or resistant + susceptible in this dataset). You could use "
+				"manual cutoff selection for this dataset. Check the manual override button to proceed.")
 	try:
 		if qtapp.use_logistic_regression == True:
 			suscep_vs_all = LogisticRegression(C=100, max_iter=10000)
@@ -95,7 +92,6 @@ def fit_data(qtapp, data_type='disk'):
 			return '0'
 	except:
 		#If we have serious unexplained errors in fitting, give 'em a catchall error message.
-		traceback.print_exc()
 		return "There was an error during fitting. The fit has not been used."
 
 
@@ -144,7 +140,7 @@ def update_error_tables(qtapp, data_type='disk'):
 			else:
 				actual_category = 2
 
-			if diskvalue[i] >= diskcutoffR:
+			if diskvalue[i] > diskcutoffR:
 				predicted_category = 2
 			elif diskvalue[i] >= diskcutoffS:
 				predicted_category = 1

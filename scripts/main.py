@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton, QVBoxLayout, QMainWindow, QMessageBox, QFileDialog, QLineEdit, QHBoxLayout, QCheckBox, QComboBox
 from PyQt5.QtGui import QPixmap
-import pandas as pd, numpy as np, plotting, modeler, data_export
+import pandas as pd, numpy as np, plotting, modeler, data_export, os
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -17,7 +17,8 @@ class disk_masher(QMainWindow):
 		self.diskcutoffS = 32
 		self.diskcutoffR = 12
 		self.use_user_defined_disk_cutoffs = False
-		self.mic_vs_mic = False
+		self.determine_if_mic_vs_mic = False
+		self.is_mic_vs_mic = False
 		self.confusion_matrix = np.zeros((3,3))
 		self.error_counts = {'very major errors':0, 'major errors':0, 'minor errors':0}
 
@@ -157,15 +158,17 @@ class disk_masher(QMainWindow):
 			self.sudden_death("You want to fit the data, but you haven't loaded any? Try loading some first. Now there's an idea!")
 			return
 		data_type = 'disk'
-		if self.mic_vs_mic:
+		if self.determine_if_mic_vs_mic:
 			data_type, error_code = modeler.determine_data_type(self)
 			if error_code != '0':
 				self.sudden_death(error_code)
 				return
 			if data_type == 'mic':
+				self.is_mic_vs_mic = True
 				self.diskS_label.setText('Susceptibility cutoff (<, mg/L)')
-				self.diskR_label.setText('Resistance cutoff (>=, mg/L)')
+				self.diskR_label.setText('Resistance cutoff (>, mg/L)')
 			else:
+				self.is_mic_vs_mic = False
 				self.diskS_label.setText('Susceptibility disk cutoff(>, mm)')
 				self.diskR_label.setText('Resistance disk cutoff (<, mm)')
 		if self.use_user_defined_disk_cutoffs == False:
@@ -197,7 +200,7 @@ class disk_masher(QMainWindow):
 			alert = QMessageBox()
 			alert.setText("You have selected use of manual cutoffs! This will override the fitting procedure and use the cutoffs you have specified whether "
 					"they are reasonable or not. 'Just because you can, doesn't mean you should.'")
-			alert.setIconPixmap(QPixmap('img\picture_of_a_microbiologist.jpg'))
+			alert.setIconPixmap(QPixmap(os.path.join('img','picture_of_a_microbiologist.jpg')))
 			alert.setWindowTitle('Warning!')
 			alert.exec_()
 			self.use_user_defined_disk_cutoffs = True
@@ -209,12 +212,13 @@ class disk_masher(QMainWindow):
 			alert = QMessageBox()
 			alert.setText("The program will now try to recognize MIC vs MIC data based on the distribution of the data and will fit and plot it differently than "
 					"it would MIC vs disk data. You may now load files with MIC in column 1 and MIC in column 2.")
-			alert.setIconPixmap(QPixmap('img\picture_of_a_microbiologist.jpg'))
+			alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
 			alert.setWindowTitle('Warning!')
 			alert.exec_()
-			self.mic_vs_mic = True
+			self.determine_if_mic_vs_mic = True
 		else:
-			self.mic_vs_mic = False
+			self.determine_if_mic_vs_mic = False
+			self.is_mic_vs_mic = False
 			self.diskS_label.setText('Susceptibility disk cutoff(>, mm)')
 			self.diskR_label.setText('Resistance disk cutoff (<, mm)')
 
@@ -232,7 +236,7 @@ class disk_masher(QMainWindow):
 				return
 			alert = QMessageBox()
 			alert.setText('Your results have been exported to a csv file entitled "%s" . Happy disking!'%filename)
-			alert.setIconPixmap(QPixmap('img\picture_of_a_microbiologist.jpg'))
+			alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
 			alert.setWindowTitle('Success!')
 			alert.exec_()
 
@@ -241,7 +245,7 @@ class disk_masher(QMainWindow):
 	def sudden_death(self, error_message):
 		alert = QMessageBox()
 		alert.setText(error_message)
-		alert.setIconPixmap(QPixmap('img\picture_of_a_zombie.jpg'))
+		alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_zombie.jpg')))
 		alert.setWindowTitle('Sudden Death')
 		alert.exec_()
 	
@@ -251,7 +255,7 @@ if __name__ == '__main__':
 	alert = QMessageBox()
 	alert.setText('Welcome to Disk Masher! Disk Masher accepts data imports in the form of .csv files. The first column '
 			'should contain the mic values, the second column should contain the disk zones in mm. Enjoy mashing your disks!')
-	alert.setIconPixmap(QPixmap('img\picture_of_a_microbiologist.jpg'))
+	alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
 	alert.setWindowTitle('Disk Masher 1.0')
 	alert.exec_()
 	current_app = disk_masher()
