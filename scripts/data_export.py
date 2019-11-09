@@ -1,6 +1,6 @@
 import pandas as pd, numpy as np, math
 
-
+#Our microbiology team requested a specific format for export data...as shown below.
 def export_results(qtapp, filename):
 	try:
 		output_data = open(filename, 'w+')
@@ -11,6 +11,10 @@ def export_results(qtapp, filename):
 		cutoffs_and_breakpoints = [float(current_value) for current_value in [qtapp.diskcutoffS, qtapp.diskcutoffR]]
 		if qtapp.is_mic_vs_mic:
 			for i in range(1, len(xbins)):
+				#It is VERY important that the disk cutoffs from the fitting procedure are rounded to the
+				#nearest integer in an appropriate way (i.e. with >= or > chosen appropriately). See
+				#also line 21-27. THe logistic regression and decision tree methods obviously return
+				#real numbers so in this function we ensure we are exporting a useful cutoff instead.
 				if cutoffs_and_breakpoints[0] > xbins[i-1] and cutoffs_and_breakpoints[0] < xbins[i]:
 					diskcutoffS = xbins[i]
 				if cutoffs_and_breakpoints[1] > xbins[i-1] and cutoffs_and_breakpoints[1] < xbins[i]:
@@ -29,6 +33,8 @@ def export_results(qtapp, filename):
 		output_data.write('%s,%s,%s,%s\n'%(str(qtapp.current_dataset.shape[0]), str(qtapp.error_counts['very major errors']),
 					str(qtapp.error_counts['major errors']), str(qtapp.error_counts['minor errors'])) )
 
+		#Our microbiology team wanted to have a text-based histogram. The code below writes a text-based
+		#histogram into the csv file.
 		output_data.write('\n\n\nThe chart below plots disk zone (on x) vs mic (on y)\n')
 		disk_values = [z for z in np.unique(qtapp.current_dataset['disks'].values)]
 		mics = [z for z in np.unique(qtapp.current_dataset['mics'].values)]
