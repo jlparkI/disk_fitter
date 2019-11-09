@@ -6,20 +6,36 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-class disk_masher(QMainWindow):
+#Each instance of the application is an object of class disk_fitter, with all of the user-defined parameters,
+#the input data, the current model / fit parameters and the results for export stored as class attributes.
+#This is an extremely simple approach adopted because the application is relatively simple and only needs to
+#perform a single task. If this were to be expanded to perform additional tasks, adding new classes for
+#each model and each input dataset would be helpful.
+class disk_fitter(QMainWindow):
 
 	def __init__(self):
 		super().__init__()
 		self.current_dataset = pd.DataFrame()
+		#Currently model choices are limited to logistic regression and decision tree.
 		self.use_logistic_regression = True
+		#The mic cutoffs are the values which determine whether a strain is S (susceptible) or R(resistant) or
+		#I (intermediate, in between the other two). These are user-defined and strain-specific.
 		self.miccutoffS = 4
 		self.miccutoffR = 16
+		#The disk cutoffs are what we want to find by fitting and plotting the data. Shown below are default
+		#starting values.
 		self.diskcutoffS = 32
 		self.diskcutoffR = 12
+		#Ordinarily we find disk cutoffs from the fitting procedure, but the user can do manual override and
+		#fit themselves.
 		self.use_user_defined_disk_cutoffs = False
+		#Sometimes (rarely) the user may import MIC vs MIC data rather than MIC vs disk. If so, adopt appropriate
+		#fitting procedures.
 		self.determine_if_mic_vs_mic = False
 		self.is_mic_vs_mic = False
+		#The confusion matrix stores predicted vs actual.
 		self.confusion_matrix = np.zeros((3,3))
+		#The error counts in the final export table distinguish between what FDA considers 'very major' and 'major errors'.
 		self.error_counts = {'very major errors':0, 'major errors':0, 'minor errors':0}
 
 		self.colormap_type = 'continuous_blue'
@@ -27,7 +43,9 @@ class disk_masher(QMainWindow):
 		self.canvas = FigureCanvas(self.central_plot)
 		self.toolbar = NavigationToolbar(self.canvas, self)
 		
-		self.setWindowTitle('Disk Masher 1.0')
+		#This next part is fairly straightforward -- we're just building the interface by adding box layouts
+		#and adding widgets to each to get the overall layout we want.
+		self.setWindowTitle('Disk Fitter 1.0')
 		self.central_widget = QWidget()
 		self.setCentralWidget(self.central_widget)
 		mainlayout = QVBoxLayout(self.central_widget)
@@ -56,7 +74,7 @@ class disk_masher(QMainWindow):
 		mainlayout.addWidget(export_button)
 		export_button.clicked.connect(self.export_results)
 
-		###Now add text boxes user can add to modify the breakpoints. These are stacked next to each other
+		###Now add text boxes user can add to modify the MIC breakpoints. These are stacked next to each other
 
 		self.susceptibility_label = QLabel('Susceptibility breakpoint (<, mg/L)')
 		horiz_layout_1.addWidget(self.susceptibility_label)
@@ -73,6 +91,7 @@ class disk_masher(QMainWindow):
 		self.resistance_breakpoint.textChanged.connect(self.update_r_cutoff)
 		horiz_layout_2.addWidget(self.resistance_breakpoint)
 		
+		#Here's where the user can select the type of model they will use to fit.
 		self.regression_type = QComboBox()
 		self.regression_type.addItem("Logistic Regression")
 		self.regression_type.addItem("Decision Tree Classifier")
@@ -134,9 +153,14 @@ class disk_masher(QMainWindow):
 		elif text == 'Continuous Green Palette':
 			self.colormap_type = 'continuous_green'
 
+			#If loading a file, need to check to make sure it contains correctly formatted data
+			#that pandas can read,
+			#otherwise do some error handling. The sudden death function (defined later) prints
+			#a message box with the error message passed to it and is used for error handling
+			#throughout.
 	def load_file(self):
 		options = QFileDialog.Options()
-		filename, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()",
+		filename, _ = QFileDialog.getOpenFileName(self,"Load File",
 						"","CSV Files (*.csv);;", options=options)
 		if filename:
 			try:
@@ -157,6 +181,8 @@ class disk_masher(QMainWindow):
 		if len(self.current_dataset.columns) < 2:
 			self.sudden_death("You want to fit the data, but you haven't loaded any? Try loading some first. Now there's an idea!")
 			return
+		#We assume the user is importing mic vs disk data unless they checked the data could be MIC vs MIC flag. If so,
+		#call determine_data_type to figure out whether this is MIC vs disk or MIC vs MIC data.
 		data_type = 'disk'
 		if self.determine_if_mic_vs_mic:
 			data_type, error_code = modeler.determine_data_type(self)
@@ -171,15 +197,18 @@ class disk_masher(QMainWindow):
 				self.is_mic_vs_mic = False
 				self.diskS_label.setText('Susceptibility disk cutoff(>, mm)')
 				self.diskR_label.setText('Resistance disk cutoff (<, mm)')
+		#If the user is NOT specifying their own cutoffs, fit the data to the user-selected model.
 		if self.use_user_defined_disk_cutoffs == False:
 			output_code = modeler.fit_data(self, data_type)
 			if output_code != '0':
 				self.sudden_death(output_code)
 				return
+		#Plot the data regardless of whether we fitted it or used their cutoffs.
 		output_code = plotting.gen_plot(self, data_type)
 		if output_code != '0':
 			self.sudden_death(output_code)
 			return
+		#Update the disk cutoff boxes to use the updated cutoffs from fitting (if the data was refit).
 		self.diskS_breakpoint.setText(str(self.diskcutoffS))
 		self.diskR_breakpoint.setText(str(self.diskcutoffR))
 
@@ -227,7 +256,7 @@ class disk_masher(QMainWindow):
 			self.sudden_death("You want to export the data, but you haven't loaded any? Try loading some first. Now there's an idea!")
 			return
 		options = QFileDialog.Options()
-		filename, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()",
+		filename, _ = QFileDialog.getSaveFileName(self,"Save File",
 						"","CSV Files (*.csv);;", options=options)
 		if filename:
 			error_code = data_export.export_results(self, filename)
@@ -235,7 +264,7 @@ class disk_masher(QMainWindow):
 				self.sudden_death(error_code)
 				return
 			alert = QMessageBox()
-			alert.setText('Your results have been exported to a csv file entitled "%s" . Happy disking!'%filename)
+			alert.setText('Your results have been exported to a csv file entitled "%s" .'%filename)
 			alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
 			alert.setWindowTitle('Success!')
 			alert.exec_()
@@ -253,11 +282,11 @@ class disk_masher(QMainWindow):
 if __name__ == '__main__':
 	app = QApplication([])
 	alert = QMessageBox()
-	alert.setText('Welcome to Disk Masher! Disk Masher accepts data imports in the form of .csv files. The first column '
+	alert.setText('Welcome to Disk Fitter! Disk Fitter accepts data imports in the form of .csv files. The first column '
 			'should contain the mic values, the second column should contain the disk zones in mm. Enjoy mashing your disks!')
 	alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
-	alert.setWindowTitle('Disk Masher 1.0')
+	alert.setWindowTitle('Disk Fitter 1.0')
 	alert.exec_()
-	current_app = disk_masher()
+	current_app = disk_fitter()
 	app.exec_()
 	exit()
