@@ -16,10 +16,10 @@ For background, installation and usage, see the User Guide below.
 
 ## User Guide
 
-[Background](Background)
-[Installation](Installation)
+Background
+Installation
 QuickStart (coming soon)
-[Model Selection](Model Selection)
+Model Selection
 MIC vs MIC Data (coming soon)
 
 
