@@ -16,12 +16,7 @@ For background, installation and usage, see the User Guide below.
 
 ## User Guide
 
-Background\n
-Installation
-QuickStart (coming soon)
-Model Selection
-MIC vs MIC Data (coming soon)
-
+(in progress)
 
 ## Background
 
