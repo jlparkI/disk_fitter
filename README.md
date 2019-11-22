@@ -16,7 +16,7 @@ For background, installation and usage, see the User Guide below.
 
 ## User Guide
 
-Background
+Background\n
 Installation
 QuickStart (coming soon)
 Model Selection
