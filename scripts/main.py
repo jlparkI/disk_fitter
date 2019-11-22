@@ -279,7 +279,7 @@ if __name__ == '__main__':
   app = QApplication([])
   alert = QMessageBox()
   alert.setText('Welcome to Disk Fitter! Disk Fitter accepts data imports in the form of .csv files. The first column '
-      'should contain the mic values, the second column should contain the disk zones in mm. Enjoy mashing your disks!')
+      'should contain the mic values, the second column should contain the disk zones in mm. Enjoy!')
   alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
   alert.setWindowTitle('Disk Fitter 1.0')
   alert.exec_()
