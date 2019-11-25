@@ -12,11 +12,7 @@ automatically calculated and the analyst can export the results to Excel in an a
 
 ![screenshot3](/screenshots/screenshot3.png)
 
-For background, installation and usage, see the User Guide below.
-
-## User Guide
-
-(in progress)
+For background, installation and usage, see Background, QuickStart and the other sections below.
 
 ## Background
 
