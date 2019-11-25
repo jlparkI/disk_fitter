@@ -44,12 +44,15 @@ Disk Fitter incorporates the following features:
 
 Disk Fitter is available for download as a precompiled executable for 64-bit Windows (see the Releases tab above). 
 Simply download, extract the zip, place in your preferred directory and double-click to run. 
-This is the easy way to obtain & run Disk Fitter.
+This is the easy way to obtain & run Disk Fitter. Be forewarned that Disk 
+Fitter may take ~20 seconds to load -- this is fairly typical.
 
-While Disk Fitter was intended for Windows, it can also be run on Linux/Mac by starting it from the command line,
-although this approach requires some more familiarity with Python and with your system's commandline.
-You must have Python 3 (preferably >3.5) installed. Next, clone the repo, create a new virtual environment and
-install the indicated libraries as shown below (instructions shown are for Linux / MacOS).
+While Disk Fitter was intended for Windows, it can also be run on Linux/Mac by starting it from the command line;
+it will load much more quickly this way, although this approach requires some more 
+familiarity with Python and with your system's commandline.
+You must have Python 3 (preferably >3.5) installed. Next, clone the repo, 
+create a new virtual environment and install the indicated libraries as shown below 
+(instructions shown are for Linux / MacOS).
 
 ```
 git clone  https://github.com/jlparkI/disk_fitter_1.0
@@ -63,6 +66,76 @@ python main.py
 
 
 ## QuickStart
+
+Double-click on the Disk Fitter icon to run the program (unless running from the commandline, 
+in which case follow the instructions above). It may take 15-20 seconds to load, this is 
+normal. You'll get the welcome prompt:
+
+![tutorial1](/screenshots/tutorial1.jpg)
+
+followed by the main window as shown below. Take a moment to explore / familiarize
+yourself with all of the available options.
+
+![tutorial2](/screenshots/tutorial2.jpg)
+
+You can load data to the main window using the "Import Data" button, then you
+can change the fitting and plotting options (choice of fitting algorithm, MIC breakpoints, manual
+override for manual cutoff selection, strain name, color palette etc.). You 
+can select new options as many times as you like. Each time you select new
+options or import a new dataset, you must click "Fit/Plot Data" before the plot
+and error counts tables are updated. Until you click "Fit/Plot", the update
+does not take place. Once the data plots, a heatmap is shown on the left,
+an error table with the error categories generally recognized by microbiologists
+on the right.
+
+![screenshot1](/screenshots/screenshot1.png)
+
+If you try to do something illegal, the program will give you a zombie-themed
+error message:
+
+![screenshot3](/screenshots/screenshot1.png)
+
+A message box with a picture of a microbiologist, by contrast, means you're trying to 
+do something that is not illegal but is also not part of the standard workflow:
+
+Once you've selected a fitting algorithm and/or picked manual cutoffs that give
+you an acceptable result, you can save the heatmap and error plot to file using the
+save button indicated in the screenshot below.
+
+![tutorial3](/screenshots/tutorial3.png)
+
+Alternatively, you can first add a title to the heatmap plot using the button to the 
+left of the save button. You'll see the following prompt -- select the option shown
+and click OK.
+
+![tutorial4](/screenshots/tutorial4.png)
+
+You can now enter your preferred title into the "Title" blank of the dialog box as 
+shown below. (You can also change many other attributes of the plot and error table
+although in most cases this won't improve the visualization, which is already generated
+using optimal settings. Feel free to experiment however if you like!)
+
+![tutorial5](/screenshots/tutorial5.png)
+
+Immediately after you change the title the updated title appears as shown below. You can
+now save the plot and associated error table to disk using the save icon.
+
+![tutorial6](/screenshots/tutorial6.png)
+
+Alternatively, if you'd rather have the results in Excel format, you can click on
+"Export Results" to save to a csv file. This file will contain a text-based 
+histogram similar to the heatmap shown in the plot and a text-based version
+of the error counts table that you get in the application.
+
+When reading the heatmap in the main window, it's important to notice that
+the tick marks indicate the MIC and disk zone in the square above and to the right of the 
+tick mark, respectively. So for example the box shown in the first figure below corresponds to MIC 16 
+mg/L and disk zone 11, while the box in the second figure corresponds to MIC
+2 and disk zone 20.
+
+You can also compare MIC data generated using two different assays with Disk
+Fitter. There are some subtleties to this that are covered in the MIC vs MIC
+section below.
 
 
 ## Model Selection
