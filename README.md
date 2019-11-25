@@ -93,7 +93,7 @@ on the right.
 If you try to do something illegal, the program will give you a zombie-themed
 error message:
 
-![screenshot3](/screenshots/screenshot1.png)
+![screenshot3](/screenshots/screenshot3.png)
 
 A message box with a picture of a microbiologist, by contrast, means you're trying to 
 do something that is not illegal but is also not part of the standard workflow:
