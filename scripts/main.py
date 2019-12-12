@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton, QVBoxLayout, QMainWindow, QMessageBox, QFileDialog, QLineEdit, QHBoxLayout, QCheckBox, QComboBox
 from PyQt5.QtGui import QPixmap
-import pandas as pd, plotting, modeler, data_export, os, model_params
+import pandas as pd, plotting, modeler, data_export, os, model_object
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -15,7 +15,7 @@ class disk_fitter(QMainWindow):
 
   def __init__(self):
     super().__init__()
-    self.curr_model = model_params.model_parameter_set()
+    self.curr_model = model_object.model_parameter_set()
 
     self.central_plot = Figure()
     self.canvas = FigureCanvas(self.central_plot)
@@ -69,8 +69,7 @@ class disk_fitter(QMainWindow):
     
     #Here's where the user can select the type of model they will use to fit.
     self.regression_type = QComboBox()
-    self.regression_type.addItem("Logistic Regression")
-    self.regression_type.addItem("Decision Tree Classifier")
+    self.regression_type.addItem("min gini impurity")
     self.regression_type.activated[str].connect(self.change_regression_type)
     horiz_layouts[2].addWidget(self.regression_type)
 
@@ -121,10 +120,8 @@ class disk_fitter(QMainWindow):
     self.curr_model.strain_name = text
 
   def change_regression_type(self, text):
-    if text == 'Logistic Regression':
-      self.curr_model.use_logistic_regression = True
-    elif text == 'Decision Tree Classifier':
-      self.curr_model.use_logistic_regression = False
+    if text == 'min gini model':
+      self.curr_model.model_type = 'mgm'
 
   def change_color_palette(self, text):
     if text == 'Blue Palette':
@@ -181,7 +178,14 @@ class disk_fitter(QMainWindow):
     #If the user is NOT specifying their own cutoffs, fit the data to the user-selected model.
     if self.curr_model.use_user_defined_disk_cutoffs == False:
       output_code = modeler.fit_data(self.curr_model, data_type)
-      if output_code != '0':
+      if output_code == '0':
+        pass
+      elif output_code.startswith('!'):
+        window_sizes = output_code.split('!, ')[1]
+        self.non_fatal_message('It was possible to fit the data using intermediate disk zone sizes of '
+                               '%s mm. The program has defaulted to the smallest window size possible.'
+                               %window_sizes)
+      else:
         self.sudden_death(output_code)
         return
     #Plot the data regardless of whether we fitted it or used their cutoffs.
@@ -221,24 +225,17 @@ class disk_fitter(QMainWindow):
 
   def manual_fit_button(self, state):
     if state == QtCore.Qt.Checked:
-      alert = QMessageBox()
-      alert.setText("You have selected use of manual cutoffs! This will override the fitting procedure and use the cutoffs you have specified whether "
+      self.non_fatal_message("You have selected use of manual cutoffs! This will override the fitting procedure and use the cutoffs you have specified whether "
           "they are reasonable or not. 'Just because you can, doesn't mean you should.'")
-      alert.setIconPixmap(QPixmap(os.path.join('img','picture_of_a_microbiologist.jpg')))
-      alert.setWindowTitle('Warning!')
-      alert.exec_()
       self.curr_model.use_user_defined_disk_cutoffs = True
     else:
       self.curr_model.use_user_defined_disk_cutoffs = False
 
   def mic_vs_mic_handling(self, state):
     if state == QtCore.Qt.Checked:
-      alert = QMessageBox()
-      alert.setText("The program will now try to recognize MIC vs MIC data based on the distribution of the data and will fit and plot it differently than "
+      self.non_fatal_message("The program will now try to recognize MIC vs MIC data based on the distribution of the "
+                    "data and will fit and plot it differently than "
           "it would MIC vs disk data. You may now load files with MIC in column 1 and MIC in column 2.")
-      alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
-      alert.setWindowTitle('Warning!')
-      alert.exec_()
       self.curr_model.determine_if_mic_vs_mic = True
     else:
       self.curr_model.determine_if_mic_vs_mic = False
@@ -259,12 +256,7 @@ class disk_fitter(QMainWindow):
       if error_code != '0':
         self.sudden_death(error_code)
         return
-      alert = QMessageBox()
-      alert.setText('Your results have been exported to a csv file entitled "%s" .'%filename)
-      alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
-      alert.setWindowTitle('Success!')
-      alert.exec_()
-
+      self.non_fatal_message('Your results have been exported to a csv file entitled "%s" .'%filename)
     
 
   def sudden_death(self, error_message):
@@ -272,6 +264,13 @@ class disk_fitter(QMainWindow):
     alert.setText(error_message)
     alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_zombie.jpg')))
     alert.setWindowTitle('Sudden Death')
+    alert.exec_()
+
+  def non_fatal_message(self, message):
+    alert = QMessageBox()
+    alert.setText(message)
+    alert.setIconPixmap(QPixmap(os.path.join('img', 'picture_of_a_microbiologist.jpg')))
+    alert.setWindowTitle('Please note')
     alert.exec_()
   
 

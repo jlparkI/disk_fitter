@@ -1,4 +1,4 @@
-import model_params, numpy as np
+import numpy as np
 
 def generate_next_line(caption, range_value, error_dict):
   nextline = [caption, range_value]

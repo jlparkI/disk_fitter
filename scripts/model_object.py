@@ -1,15 +1,16 @@
-import pandas as pd
+import pandas as pd, model_core
 
 
 class model_parameter_set():
 
   def __init__(self):
     self.current_dataset = pd.DataFrame()
-    self.use_logistic_regression = True
+    self.model_type = 'mgm'
     self.miccutoffS = 4.0
     self.miccutoffR = 16.0
     self.diskcutoffS = 32.0
     self.diskcutoffR = 12.0
+    self.model_engine = model_core.mgm()
     self.strain_name = 'Acinteobacter baumannii'
     self.use_user_defined_disk_cutoffs = False
     self.determine_if_mic_vs_mic = False
@@ -54,8 +55,7 @@ class model_parameter_set():
     diskvalue = list(self.current_dataset['disks'].values)
     micvalue = list(self.current_dataset['mics'].values)
     for i in range(0, self.current_dataset.shape[0]):
-      #Assign predictions and actual values to categories and populate the confusion matrix
-      #accordingly.
+      #Assign predictions and actual values to categories
       if micvalue[i] <= self.miccutoffS:
         actual_category = 0
       elif micvalue[i] < self.miccutoffR:
@@ -70,12 +70,12 @@ class model_parameter_set():
       else:
         predicted_category = 2
 
-      if diskvalue[i] >= (self.diskcutoffS + 2):
+      if micvalue[i] > (self.miccutoffR):
         self.i_plus2_error['num_strains'] += 1
         error_code = self.check_is_error(predicted_category, actual_category)
         if error_code != 'no error':
           self.i_plus2_error[error_code] += 1
-      elif diskvalue[i] <= (self.diskcutoffS + 1) and diskvalue[i] >= (self.diskcutoffR + 1):
+      elif micvalue[i] <= self.miccutoffR and micvalue[i] >= self.miccutoffS:
         self.i_plus1_minus1_error['num_strains'] += 1
         error_code = self.check_is_error(predicted_category, actual_category)
         if error_code != 'no error':
