@@ -1,4 +1,4 @@
-from PyQt5 import QtCore
+from PyQt5 import QtCorei
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton, QVBoxLayout, QMainWindow, QMessageBox, QFileDialog, QLineEdit, QHBoxLayout, QCheckBox, QComboBox
 from PyQt5.QtGui import QPixmap
 import pandas as pd, plotting, modeler, data_export, os, model_object
@@ -7,7 +7,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 
 #Each instance of the application is an object of class disk_fitter, with all of the user-defined parameters,
-#the input data, the current model / fit parameters and the results for export stored as class attributes.
+#the input data, the current model (object of class model_parameter_set) and the results for export stored as class attributes.
 #This is an extremely simple approach adopted because the application is relatively simple and only needs to
 #perform a single task. If this were to be expanded to perform additional tasks, adding new classes for
 #each model and each input dataset would be helpful.
@@ -119,6 +119,8 @@ class disk_fitter(QMainWindow):
   def strain_name_change(self, text):
     self.curr_model.strain_name = text
 
+  #Currently there is only one model type available; this function
+  #is here in case we ever add another...
   def change_regression_type(self, text):
     if text == 'min gini model':
       self.curr_model.model_type = 'mgm'
@@ -175,11 +177,14 @@ class disk_fitter(QMainWindow):
         self.curr_model.is_mic_vs_mic = False
         self.diskS_label.setText('Susceptibility disk cutoff(>=, mm)')
         self.diskR_label.setText('Resistance disk cutoff (<=, mm)')
-    #If the user is NOT specifying their own cutoffs, fit the data to the user-selected model.
+    #If the user is NOT specifying their own cutoffs, fit the data by passing the model (object of class model_parameter_set) to the fit_data function in the
+#modeler.py file.
     if self.curr_model.use_user_defined_disk_cutoffs == False:
       output_code = modeler.fit_data(self.curr_model, data_type)
       if output_code == '0':
         pass
+      #THe end user asked to know whether it was possible to get an optimal fit
+      #using different window sizes, hence this.
       elif output_code.startswith('!'):
         window_sizes = output_code.split('!, ')[1]
         self.non_fatal_message('It was possible to fit the data using intermediate disk zone sizes of '
@@ -243,7 +248,8 @@ class disk_fitter(QMainWindow):
       self.diskS_label.setText('Susceptibility disk cutoff(>=, mm)')
       self.diskR_label.setText('Resistance disk cutoff (<=, mm)')
 
-
+  #The end user wanted the ability to output to a csv file with the same data
+  #as contained in the plot but in a text-based histogram.
   def export_results(self):
     if len(self.curr_model.current_dataset.columns) < 2:
       self.sudden_death("You want to export the data, but you haven't loaded any? Try loading some first. Now there's an idea!")
@@ -258,7 +264,8 @@ class disk_fitter(QMainWindow):
         return
       self.non_fatal_message('Your results have been exported to a csv file entitled "%s" .'%filename)
     
-
+  #This function prints out the error message passed to it in a zombie-themed
+  #message box.
   def sudden_death(self, error_message):
     alert = QMessageBox()
     alert.setText(error_message)
@@ -266,6 +273,8 @@ class disk_fitter(QMainWindow):
     alert.setWindowTitle('Sudden Death')
     alert.exec_()
 
+  #This function prints out a non-fatal message passed to it in a microbiologist
+  #themed text box.
   def non_fatal_message(self, message):
     alert = QMessageBox()
     alert.setText(message)
@@ -273,7 +282,8 @@ class disk_fitter(QMainWindow):
     alert.setWindowTitle('Please note')
     alert.exec_()
   
-
+#Entry point. When script runs, create an object of class disk_fitter after
+#giving the user some preliminary information.
 if __name__ == '__main__':
   app = QApplication([])
   alert = QMessageBox()

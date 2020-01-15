@@ -1,6 +1,13 @@
 import pandas as pd, model_core
 
-
+#Class model_parameter_set is the object that stores all associated model parameters.
+#Each instance of disk_fitter has an object of class model_parameter_set stored
+#as its "current model", and any time fitting occurs, it updates the object
+#attributes, all of which are listed below.
+#The model_parameter_set object in turn contains an object of class mgm (described
+#in model_core.py) as one of ITS attributes, and this mgm object and its
+#routines will do the actual fitting.
+#THe functions that update the error tables, however, belong to class model_parameter_set.
 class model_parameter_set():
 
   def __init__(self):
