@@ -26,13 +26,14 @@ When a patient has an infection, doctors need to determine whether a bacterial s
 
 Frequently, a hospital just wants to know whether they can treat a patient with an antibiotic or not. So MICs are divided into three categories based on values called “breakpoints”. These categories are “Susceptible”, “Intermediate” and “Resistant”. If the bug is susceptible, it’s ok to go ahead and treat. If the bug is intermediate, maybe this antibiotic can be used, this decision is up to the doctor, and if it’s resistant definitely do not use this antibiotic. If the breakpoints are 2 and 16, for example, a bug with an MIC less than 2 is susceptible (good to treat), and a bug with an MIC less than 16 but greater than 2 is intermediate. The problem is that these categories are set based on broth MICs, whereas the hospital may need to use a disk test or E-test instead (tests 2 and 3). 
 
-So microbiologists must find out how the disk and (sometimes) E-test measurements correspond to the broth MICs. The goal is to pick disk breakpoints/cutoffs and E-test breakpoints/cutoffs that give results which match the results of the gold-standard MIC test as reliably as possible. So if based on the MIC test, strains A-G should be classified as “Resistant” and strains H-Z should be classified as “Susceptible”, we need to pick a disk cutoff that would classify as many of them correctly as possible. 
-In other words, we can think of this as a simple supervised learning prediction task. Given a vector [1,disk zone], we need to correctly predict membership in an output category belonging to the set {0,1,2}, where 0 is susceptible, 1 is intermediate and 2 is resistant. We want to find two linear boundaries (disk zone cutoff for susceptible vs intermediate and disk zone cutoff for intermediate vs resistant) that maximize the accuracy of predictions made using the disks. Two simple approaches for choosing such boundaries are logistic regression, which tries to maximize the probability of correctly choosing output categories but is easily thrown off by outliers in smaller datasets, and a depth-1 decision tree classifier, which tries to maximize the purity of the populations on either side of the split point and is far more robust to outliers.
+So microbiologists must find out how the disk and (sometimes) E-test measurements correspond to the broth MICs. The goal is to pick disk breakpoints/cutoffs and E-test breakpoints/cutoffs that give results which match the results of the gold-standard MIC test as reliably as possible. So if based on the MIC test, strains A-G should be classified as “Resistant” and strains H-Z should be classified as “Susceptible”, we need to pick a disk cutoff that would classify as many of them correctly as possible.
+
+In other words, we can think of this as a simple supervised learning prediction task. Given a vector [1,disk zone], we need to correctly predict membership in an output category belonging to the set {0,1,2}, where 0 is susceptible, 1 is intermediate and 2 is resistant. We want to find two linear boundaries (disk zone cutoff for susceptible vs intermediate and disk zone cutoff for intermediate vs resistant) that maximize the accuracy of predictions made using the disks. One complicating factor here is that the linear boundaries we select must meet certain criteria (must not be more than 5 mm apart). The simplest way to find such boundaries is to find split points which minimize the gini impurity (or the entropy, but I use gini impurity here) of the datasets resulting from the splits.
 
 Disk Fitter incorporates the following features:
 
 + Provides a simple and intuitive GUI interface;
-+ Offers the analyst the ability to import either MIC vs E-test MIC or MIC vs disk data from Excel, automatically fit and plot the data and the error rates using either logistic regression or decision tree based approaches;
++ Offers the analyst the ability to import either MIC vs E-test MIC or MIC vs disk data from Excel, automatically fit and plot the data and the error rates;
 + Offers the analyst the ability to manually choose cutoffs if the analyst prefers this approach to the auto-fit procedure and see their effect on the error rate;
 + Finally, the analyst can export the heatmap plot, error rate table and other results to Excel for further review.
 
@@ -132,43 +133,6 @@ mg/L and disk zone 11, while the box in the second figure corresponds to MIC
 You can also compare MIC data generated using two different assays with Disk
 Fitter. There are some subtleties to this that are covered in the MIC vs MIC
 section below.
-
-
-## Model Selection
-
-There are three ways to choose cutoffs for your assay of interest in Disk Fitter: manually, using
-logistic regression or using a depth-1 decision tree (it's sort of misleading to call this a tree,
-since it is only depth 1, but we are using the same algorithm we would use to choose a split point
-in a tree). Both algorithmic approaches use a one-versus-all strategy to pick a split separating
-susceptible from the rest and another split to resistant from the rest.
-
-On very small datasets or on unusual datasets (e.g. dataset with no susceptible or no resistant
-strains), you may be able to choose split points that are more suitable than those chosen by an
-algorithm, since you may be aware of other constraints on assay data interpretation not known to
-the algorithm. On larger datasets, by contrast, one of the two algorithms you have available will
-generally give good results. So which to choose?
-
-The decision tree model will generally be much less susceptible to outliers. (More on why this 
-is in a minute). If your dataset has outliers decision tree will be the more robust algorithm,
-especially if the dataset is relatively small. Logistic regression, by contrast, will be more
-heavily influenced by outliers, which may under some circumstances be desired behavior. If in
-doubt, it's easy to try both -- just select one and fit, then select the other and fit, and
-compare the results tables.
-
-Why can the two approaches give different results? The decision tree model is trying to minimize
-the entropy of the child populations resulting from the split (sort of like trying
-to maximize the purity of these two populations). If an outlier datapoint is very far from the 
-chosen split point, it will not affect the cost function of the model to any greater extent than
-it would if it were close to the chosen split point. In logistic regression, by contrast, we are
-using a maximum likelihood approach, meaning we want to maximize the probability of getting
-the set of class labels we observe, and we assume that the log-odds are linear, so a datapoint
-which is very far on one side of a splitpoint is therefore predicted to have a high probability
-of belonging to the predicted class. (The split point is the line of 50% probability -- could
-belong to either class, it's a coin toss). An outlier datapoint therefore has a high predicted
-probability of belonging to the _wrong_ class, causing it to have a much greater effect on the 
-cost function (cross-entropy) and on the gradient and thus potentially shifting the minimum to
-a much greater extent. Under some circumstances this may be desired behavior, so the choice of
-algorithm is left to the user.
 
 ## MIC vs MIC Data
 
