@@ -1,4 +1,4 @@
-from PyQt5 import QtCorei
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton, QVBoxLayout, QMainWindow, QMessageBox, QFileDialog, QLineEdit, QHBoxLayout, QCheckBox, QComboBox
 from PyQt5.QtGui import QPixmap
 import pandas as pd, plotting, modeler, data_export, os, model_object
