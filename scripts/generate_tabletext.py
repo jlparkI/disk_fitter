@@ -20,15 +20,15 @@ def generate_next_line(caption, range_value, error_dict):
 #The plot shown to the user is divided into two panes: a heatmap and a table with error information.
 #The table celltext is in this function.
 def generate_celltext(current_model):
-  diskcutoffS = float(current_model.diskcutoffS)
-  diskcutoffR = float(current_model.diskcutoffR)
+  diskcutoffS = float(current_model.xcutoffS)
+  diskcutoffR = float(current_model.xcutoffR)
   celltext = [['Proposed Disk\nBreakpoint (mm)', 'Range',
                'No.\nIsolates', '', 'No. of Errors', '']]
   celltext.append(['','','','Very\nmajor (%)', 'Major (%)', 'Minor (%)'])
   celltext.append([current_model.strain_name, '', '', '', '', ''])
-  if current_model.is_mic_vs_mic == False:
-    if current_model.diskcutoffS > current_model.diskcutoffR + 1:
-      int_range = [current_model.diskcutoffR + 1, current_model.diskcutoffS - 1]
+  if current_model.mic_vs_mic == False:
+    if current_model.xcutoffS > current_model.xcutoffR + 1:
+      int_range = [current_model.xcutoffR + 1, current_model.xcutoffS - 1]
       disk_cutoff_text = '>=%s (S) / %s-%s (I) /\n<=%s (R)'%(str(diskcutoffS),
                                                         str(int_range[0]),
                                                         str(int_range[1]),
@@ -37,10 +37,10 @@ def generate_celltext(current_model):
       disk_cutoff_text = '>=%s (S) / <=%s (R)'%(str(diskcutoffS), str(diskcutoffR))
   else:
     xbins = [0.016,0.03,0.06,0.12,0.125,0.25,0.5,1,2,4,8,16,32,64,128,256]
-    if (xbins.index(current_model.diskcutoffR) >
-        (xbins.index(current_model.diskcutoffS) + 1)):
-      int_range = [xbins[xbins.index(current_model.diskcutoffS) + 1],
-                   xbins[xbins.index(current_model.diskcutoffR) - 1]]
+    if (xbins.index(current_model.xcutoffR) >
+        (xbins.index(current_model.xcutoffS) + 1)):
+      int_range = [xbins[xbins.index(current_model.xcutoffS) + 1],
+                   xbins[xbins.index(current_model.xcutoffR) - 1]]
       disk_cutoff_text = '<=%s (S) / %s-%s (I) /\n>=%s (R)'%(str(diskcutoffS),
                                                         str(int_range[0]),
                                                         str(int_range[1]),
@@ -51,6 +51,11 @@ def generate_celltext(current_model):
   celltext.append(generate_next_line('', '>=I+2', current_model.i_plus2_error))
   celltext.append(generate_next_line('', 'I+1 to I-1', current_model.i_plus1_minus1_error))
   celltext.append(generate_next_line('', '<=I-2', current_model.i_minus2_error))
+  if current_model.mic_vs_mic == True:
+    celltext.append(['Essential agreement (%)', str(round(current_model.essential_agreement,2)),
+                     '', '', '', ''])
+    celltext.append(['Categorical agreement (%)', str(round(current_model.categorical_agreement,2)),
+                     '', '', '', ''])
   return celltext
   
 def mergecells(table, ix0, ix1):
@@ -75,8 +80,8 @@ def mergecells(table, ix0, ix1):
                 table[ix[0], ix[1]].visible_edges = e
 
 
-def fix_table(table):
-  for i in range(0, 6):
+def fix_table(table, is_mic_vs_mic=False):
+  for i in range(0,6):
     table[(0,i)].set_height(0.12)
     table[(0,i)]._text.set_fontweight('bold')
     table[(1,i)].set_height(0.12)
@@ -85,12 +90,18 @@ def fix_table(table):
     mergecells(table, (4,i), (3,i))
     mergecells(table, (5,i), (4,i))
     mergecells(table, (6,i), (5,i))
+    if is_mic_vs_mic:
+      mergecells(table, (7,i), (6,i))
+      mergecells(table, (8,i), (7,i))
     if i > 0:
       mergecells(table, (2,i-1), (2,i))
       mergecells(table, (3,i-1), (3,i))
       mergecells(table, (4,i-1), (4,i))
       mergecells(table, (5,i-1), (5,i))
       mergecells(table, (6,i-1), (6,i))
+      if is_mic_vs_mic:
+        mergecells(table, (7,i-1), (7,i))
+        mergecells(table, (8,i-1), (8,i))
   mergecells(table, (1,0), (0,0))
   mergecells(table, (0, 3), (0,4))
   mergecells(table, (0, 4), (0,5))
