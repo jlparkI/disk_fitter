@@ -22,7 +22,11 @@ def generate_next_line(caption, range_value, error_dict):
 def generate_celltext(current_model):
   diskcutoffS = float(current_model.xcutoffS)
   diskcutoffR = float(current_model.xcutoffR)
-  celltext = [['Proposed Disk\nBreakpoint (mm)', 'Range',
+  if current_model.mic_vs_mic == False:
+    celltext = [['Proposed Disk\nBreakpoint (mm)', 'Range',
+               'No.\nIsolates', '', 'No. of Errors', '']]
+  else:
+    celltext = [['MIC breakpoints (mg/L)', 'Range',
                'No.\nIsolates', '', 'No. of Errors', '']]
   celltext.append(['','','','Very\nmajor (%)', 'Major (%)', 'Minor (%)'])
   celltext.append([current_model.strain_name, '', '', '', '', ''])
